@@ -1,14 +1,23 @@
 [
   {
-    "id": "1767965091240",
-    "description": "coffe",
-    "amount": 100,
-    "date": "2026-01-09"
+    "id": "1768009632590",
+    "description": "Tea",
+    "amount": 1333,
+    "date": "2026/01/01",
+    "category": "Food"
   },
   {
-    "id": "1767965298053",
-    "description": "tea",
-    "amount": 20,
-    "date": "2026-01-09"
+    "id": "1768010050244",
+    "description": "Tea",
+    "amount": 10,
+    "date": "2026-01-10",
+    "category": "Other"
+  },
+  {
+    "id": "1768010164134",
+    "description": "Test",
+    "amount": 455,
+    "date": "2026-01-10",
+    "category": "Other"
   }
 ]
