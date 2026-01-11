@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import AddExpenseForm from './components/AddExpenseForm'
-import ExpenseList from './components/ExpenseList'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Home from './pages/Home'
 import Settings from './components/Settings'
 import Reports from './components/Reports'
+import Transactions from './pages/Transactions'
 import './App.css'
 
 const API_URL = 'http://localhost:5001/api/expenses';
@@ -15,8 +17,6 @@ function App() {
     const [categories, setCategories] = useState([])
     const [editingExpense, setEditingExpense] = useState(null)
     const [currency, setCurrency] = useState('₹'); // Default currency
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isReportsOpen, setIsReportsOpen] = useState(false);
     const [newCategory, setNewCategory] = useState('');
 
     const fetchExpenses = async () => {
@@ -101,56 +101,60 @@ function App() {
         }
     };
 
-    const handleViewReports = () => {
-        setIsSettingsOpen(false);
-        setIsReportsOpen(true);
-    };
-
     return (
-        <div className="app-container">
-            <div className="header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1 style={{ margin: 0 }}>Expense Tracker</h1>
-                <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '5px' }}
-                    title="Settings"
-                >
-                    ⚙️
-                </button>
+        <Router>
+            <div className="app-container">
+                <Navbar />
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <Home
+                                expenses={expenses}
+                                onAdd={handleAddExpense}
+                                onUpdate={handleUpdateExpense}
+                                onDelete={handleDeleteExpense}
+                                editingExpense={editingExpense}
+                                setEditingExpense={setEditingExpense}
+                                categories={categories}
+                                currency={currency}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/reports"
+                        element={
+                            <Reports
+                                expenses={expenses}
+                                currency={currency}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/transactions"
+                        element={
+                            <Transactions
+                                expenses={expenses}
+                                currency={currency}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/settings"
+                        element={
+                            <Settings
+                                currency={currency}
+                                onUpdateCurrency={handleUpdateCurrency}
+                                newCategory={newCategory}
+                                setNewCategory={setNewCategory}
+                                onAddCategory={handleAddCategory}
+                                categories={categories}
+                            />
+                        }
+                    />
+                </Routes>
             </div>
-
-            <AddExpenseForm
-                onAdd={handleAddExpense}
-                onUpdate={handleUpdateExpense}
-                editingExpense={editingExpense}
-                setEditingExpense={setEditingExpense}
-                categories={categories}
-            />
-            <ExpenseList
-                expenses={expenses}
-                onDelete={handleDeleteExpense}
-                onEdit={setEditingExpense}
-                currency={currency}
-            />
-            <Settings
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                currency={currency}
-                onUpdateCurrency={handleUpdateCurrency}
-                newCategory={newCategory}
-                setNewCategory={setNewCategory}
-                onAddCategory={handleAddCategory}
-                categories={categories}
-                onViewReports={handleViewReports}
-            />
-            {isReportsOpen && (
-                <Reports
-                    expenses={expenses}
-                    currency={currency}
-                    onClose={() => setIsReportsOpen(false)}
-                />
-            )}
-        </div>
+        </Router>
     )
 }
 

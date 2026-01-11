@@ -2,8 +2,8 @@
   {
     "id": "1768009632590",
     "description": "Tea",
-    "amount": 1333,
-    "date": "2026/01/01",
+    "amount": 900,
+    "date": "2026-09-01",
     "category": "Food"
   },
   {
@@ -18,6 +18,62 @@
     "description": "Test",
     "amount": 455,
     "date": "2026-01-10",
+    "category": "Other"
+  },
+  {
+    "id": "1768113759197",
+    "description": "Food",
+    "amount": 100,
+    "date": "2026-01-11",
+    "category": "Food"
+  },
+  {
+    "id": "1768113873091",
+    "description": "cloths",
+    "amount": 900,
+    "date": "2026-01-11",
+    "category": "clothes"
+  },
+  {
+    "id": "1768113957034",
+    "description": "Others",
+    "amount": 100,
+    "date": "2026-01-11",
+    "category": "Food"
+  },
+  {
+    "id": "1768114167306",
+    "description": "clothes",
+    "amount": -100,
+    "date": "2026-01-11",
+    "category": "clothes"
+  },
+  {
+    "id": "1768114459409",
+    "description": "Fuel",
+    "amount": -9000,
+    "date": "2026-01-03",
+    "category": "Other"
+  },
+  {
+    "id": "1768115223135",
+    "description": "clothes",
+    "amount": -220,
+    "date": "2026-01-11",
+    "category": "clothes"
+  },
+  {
+    "id": "1768115246450",
+    "description": "foods",
+    "amount": -400,
+    "date": "2026-01-11",
+    "category": "Food"
+  },
+  {
+    "id": "1768116683672",
+    "description": "test",
+    "amount": -100,
+    "date": "2026-01-11",
     "category": "Other"
   }
 ]

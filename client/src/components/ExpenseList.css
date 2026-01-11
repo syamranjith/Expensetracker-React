@@ -1,73 +1,152 @@
-.expense-list {
-    background: transparent;
-    padding: 0;
-    border-radius: 8px;
-    margin-top: 20px;
+.expense-list-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-h2 {
-    text-align: left;
-    font-size: 1.5rem;
+.filters-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
-    font-weight: 600;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-btn.active {
+    background: #646cff;
+    color: white;
+    border-color: #646cff;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.summary-card {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.summary-card h4 {
+    margin: 0 0 5px 0;
+    color: #888;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.summary-card p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.summary-card.income p {
+    color: #00d2d3;
+}
+
+.summary-card.expense p {
+    color: #ff6b6b;
+}
+
+.summary-card.balance p {
+    color: #fff;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.expense-table {
+    width: 100%;
+    border-collapse: collapse;
     color: white;
 }
 
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-th {
+.expense-table th {
     text-align: left;
-    padding: 16px;
-    color: #a0a0a0;
-    font-weight: 500;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
+    padding: 12px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: #888;
+    font-weight: 600;
 }
 
-td {
-    padding: 16px;
+.expense-table td {
+    padding: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: #e0e0e0;
 }
 
-tr:last-child td {
+.expense-table tr:last-child td {
     border-bottom: none;
 }
 
-tr:hover td {
-    background-color: rgba(255, 255, 255, 0.03);
-}
-
-.expense {
-    color: #ff6b6b;
-    font-weight: 600;
-}
-
-.income {
+.income-amount {
     color: #00d2d3;
-    font-weight: 600;
+    font-weight: 500;
 }
 
-button {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    border-radius: 6px;
+.expense-amount {
+    color: #ff6b6b;
+    font-weight: 500;
 }
 
 .delete-btn {
-    background-color: rgba(255, 71, 87, 0.15);
-    color: #ff4757;
-    border: 1px solid rgba(255, 71, 87, 0.3);
-    transition: all 0.2s;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+    margin-left: 5px;
 }
 
 .delete-btn:hover {
-    background-color: rgba(255, 71, 87, 0.25);
-    border-color: #ff4757;
+    background-color: #cc0000;
+}
+
+.edit-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.edit-btn:hover {
+    background-color: #45a049;
+}
+
+.category-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #ddd;
 }

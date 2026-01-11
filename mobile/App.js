@@ -13,6 +13,8 @@ const API_URL = 'http://192.168.31.113:5001/api/expenses';
 const CATEGORIES_API_URL = 'http://192.168.31.113:5001/api/categories';
 const SETTINGS_API_URL = 'http://192.168.31.113:5001/api/settings';
 
+import { Modal } from 'react-native';
+
 export default function App() {
     const [expenses, setExpenses] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -20,6 +22,7 @@ export default function App() {
     const [currency, setCurrency] = useState('₹');
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [isReportsVisible, setIsReportsVisible] = useState(false);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
     const fetchExpenses = async () => {
         try {
@@ -27,7 +30,6 @@ export default function App() {
             setExpenses(response.data);
         } catch (error) {
             console.error('Error fetching expenses:', error);
-            // Alert.alert('Error', 'Could not fetch expenses. Ensure backend is running.');
         }
     };
 
@@ -61,6 +63,7 @@ export default function App() {
         try {
             const response = await axios.post(API_URL, expense);
             setExpenses([...expenses, response.data]);
+            setIsAddModalVisible(false);
         } catch (error) {
             console.error('Error adding expense:', error);
             Alert.alert('Error', 'Could not add expense.');
@@ -72,6 +75,7 @@ export default function App() {
             const response = await axios.put(`${API_URL}/${updatedExpense.id}`, updatedExpense);
             setExpenses(expenses.map(e => e.id === updatedExpense.id ? response.data : e));
             setEditingExpense(null);
+            setIsAddModalVisible(false);
         } catch (error) {
             console.error('Error updating expense:', error);
             Alert.alert('Error', 'Could not update expense.');
@@ -116,30 +120,64 @@ export default function App() {
         setIsReportsVisible(true);
     };
 
+    const openAddModal = () => {
+        setEditingExpense(null);
+        setIsAddModalVisible(true);
+    };
+
+    const openEditModal = (expense) => {
+        setEditingExpense(expense);
+        setIsAddModalVisible(true);
+    };
+
+    const closeAddModal = () => {
+        setEditingExpense(null);
+        setIsAddModalVisible(false);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Expense Tracker</Text>
-                <TouchableOpacity onPress={() => setIsSettingsVisible(true)} style={styles.settingsButton}>
-                    <Text style={styles.settingsButtonText}>⚙️</Text>
-                </TouchableOpacity>
+                <View style={styles.headerRight}>
+                    <TouchableOpacity onPress={openAddModal} style={styles.iconButton}>
+                        <Text style={styles.iconButtonText}>+</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setIsSettingsVisible(true)} style={styles.iconButton}>
+                        <Text style={styles.iconButtonText}>⚙️</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <AddExpenseForm
-                    onAdd={handleAddExpense}
-                    onUpdate={handleUpdateExpense}
-                    editingExpense={editingExpense}
-                    setEditingExpense={setEditingExpense}
-                    categories={categories}
-                />
                 <ExpenseList
                     expenses={expenses}
                     onDelete={handleDeleteExpense}
-                    onEdit={setEditingExpense}
+                    onEdit={openEditModal}
                     currency={currency}
                 />
             </ScrollView>
+
+            <Modal
+                visible={isAddModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={closeAddModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <AddExpenseForm
+                            onAdd={handleAddExpense}
+                            onUpdate={handleUpdateExpense}
+                            editingExpense={editingExpense}
+                            setEditingExpense={setEditingExpense}
+                            categories={categories}
+                            onAddCategory={handleAddCategory}
+                            onCancel={closeAddModal}
+                        />
+                    </View>
+                </View>
+            </Modal>
 
             <Settings
                 visible={isSettingsVisible}
@@ -170,28 +208,38 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 40,
-        marginBottom: 20,
-        position: 'relative',
+        marginBottom: 10,
         paddingHorizontal: 20,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#fff',
-        textAlign: 'center',
     },
-    settingsButton: {
-        position: 'absolute',
-        right: 20,
+    headerRight: {
+        flexDirection: 'row',
+        gap: 15,
+    },
+    iconButton: {
         padding: 5,
     },
-    settingsButtonText: {
-        fontSize: 24,
+    iconButtonText: {
+        fontSize: 28,
+        color: '#fff',
     },
     scrollContent: {
         padding: 20,
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        width: '100%',
+    }
 });

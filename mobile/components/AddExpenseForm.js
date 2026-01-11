@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
-const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, categories = [], onAddCategory }) => {
+const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, categories = [], onAddCategory, onCancel }) => {
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [category, setCategory] = useState('Other');
+    const [type, setType] = useState('expense'); // 'expense' | 'income'
     const [errors, setErrors] = useState({});
 
     // New Category State
@@ -15,7 +16,9 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
     useEffect(() => {
         if (editingExpense) {
             setDescription(editingExpense.description);
-            setAmount(editingExpense.amount.toString());
+            const editingAmount = parseFloat(editingExpense.amount);
+            setAmount(Math.abs(editingAmount).toString());
+            setType(editingAmount < 0 ? 'expense' : 'income');
             setDate(editingExpense.date);
             setCategory(editingExpense.category || 'Other');
         } else {
@@ -28,6 +31,7 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
         setAmount('');
         setDate(new Date().toISOString().split('T')[0]);
         setCategory('Other');
+        setType('expense');
         setErrors({});
     };
 
@@ -44,9 +48,11 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
     const handleSubmit = () => {
         if (!validate()) return;
 
+        const finalAmount = type === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
+
         const expenseData = {
             description,
-            amount: parseFloat(amount),
+            amount: finalAmount,
             date,
             category
         };
@@ -62,6 +68,7 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
     const handleCancel = () => {
         setEditingExpense(null);
         setErrors({});
+        if (onCancel) onCancel();
     };
 
     const handleAddNewCategory = async () => {
@@ -80,6 +87,21 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
             {Object.keys(errors).length > 0 && (
                 <Text style={styles.errorBanner}>Please fill in all fields</Text>
             )}
+
+            <View style={styles.typeContainer}>
+                <TouchableOpacity
+                    style={[styles.typeButton, type === 'expense' && styles.activeExpense]}
+                    onPress={() => setType('expense')}
+                >
+                    <Text style={styles.buttonText}>Expense</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.typeButton, type === 'income' && styles.activeIncome]}
+                    onPress={() => setType('income')}
+                >
+                    <Text style={styles.buttonText}>Income</Text>
+                </TouchableOpacity>
+            </View>
 
             <Text style={styles.label}>Description</Text>
             <TextInput
@@ -155,17 +177,18 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
             </ScrollView>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <TouchableOpacity
+                    style={[styles.submitButton, { backgroundColor: type === 'income' ? '#00d2d3' : '#646cff' }]}
+                    onPress={handleSubmit}
+                >
                     <Text style={styles.buttonText}>
-                        {editingExpense ? 'Update Expense' : 'Add Expense'}
+                        {editingExpense ? 'Update Transaction' : 'Add Transaction'}
                     </Text>
                 </TouchableOpacity>
 
-                {editingExpense && (
-                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-                        <Text style={styles.buttonText}>Cancel</Text>
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                    <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -179,6 +202,28 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    typeContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 16,
+    },
+    typeButton: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    activeExpense: {
+        backgroundColor: '#ff6b6b',
+        borderColor: '#ff6b6b',
+    },
+    activeIncome: {
+        backgroundColor: '#00d2d3',
+        borderColor: '#00d2d3',
     },
     errorBanner: {
         color: '#ff6b6b',
@@ -220,6 +265,7 @@ const styles = StyleSheet.create({
     },
     categoryChipSelected: {
         backgroundColor: '#646cff',
+        borderColor: '#646cff', // Added border match just in case, though bg is usually enough
     },
     categoryText: {
         color: '#ccc',

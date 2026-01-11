@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const Reports = ({ expenses, currency, onClose }) => {
+const Reports = ({ expenses, currency }) => {
     const [view, setView] = useState('daily'); // daily, weekly, monthly, yearly
 
     const aggregatedData = useMemo(() => {
@@ -23,62 +23,63 @@ const Reports = ({ expenses, currency, onClose }) => {
                 key = `${date.getFullYear()}`;
             }
 
-            if (!data[key]) data[key] = 0;
-            data[key] += parseFloat(expense.amount);
+            if (!data[key]) data[key] = { income: 0, expense: 0 };
+            const amount = parseFloat(expense.amount);
+            if (amount > 0) {
+                data[key].income += amount;
+            } else {
+                data[key].expense += Math.abs(amount);
+            }
         });
 
         return Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
     }, [expenses, view]);
 
-    const maxAmount = Math.max(...aggregatedData.map(([, amount]) => amount), 0);
+    const maxAmount = Math.max(...aggregatedData.map(([, { income, expense }]) => Math.max(income, expense)), 0) || 1;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content reports-modal" style={{ maxWidth: '800px' }}>
-                <div className="modal-header">
-                    <h2>Spending Reports</h2>
-                    <button className="close-button" onClick={onClose}>&times;</button>
-                </div>
+        <div className="page-container" style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+            <h2 style={{ marginBottom: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>Spending Reports</h2>
 
-                <div className="reports-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                    {['daily', 'weekly', 'monthly', 'yearly'].map(v => (
-                        <button
-                            key={v}
-                            onClick={() => setView(v)}
-                            className={view === v ? 'active' : ''}
-                            style={{ textTransform: 'capitalize' }}
-                        >
-                            {v}
-                        </button>
-                    ))}
-                </div>
+            <div className="reports-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                {['daily', 'weekly', 'monthly', 'yearly'].map(v => (
+                    <button
+                        key={v}
+                        onClick={() => setView(v)}
+                        className={view === v ? 'active' : ''}
+                        style={{ textTransform: 'capitalize' }}
+                    >
+                        {v}
+                    </button>
+                ))}
+            </div>
 
-                <div className="reports-list" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {aggregatedData.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#888' }}>No data available.</p>
-                    ) : (
-                        aggregatedData.map(([key, amount]) => (
-                            <div key={key} style={{ marginBottom: '15px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                    <span>{key}</span>
-                                    <span>{currency}{amount.toFixed(2)}</span>
+            <div className="reports-list">
+                {aggregatedData.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: '#888' }}>No data available.</p>
+                ) : (
+                    aggregatedData.map(([key, { income, expense }]) => (
+                        <div key={key} style={{ marginBottom: '15px', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px' }}>
+                            <div style={{ marginBottom: '10px', fontWeight: 'bold', color: '#ccc', fontSize: '0.9rem' }}>{key}</div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                <div style={{ width: '60px', fontSize: '0.8rem', color: '#00d2d3', fontWeight: '600' }}>Income</div>
+                                <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginRight: '10px' }}>
+                                    <div style={{ width: `${(income / maxAmount) * 100}%`, height: '100%', background: '#00d2d3', transition: 'width 0.5s ease' }}></div>
                                 </div>
-                                <div style={{
-                                    height: '10px',
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '5px',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{
-                                        width: `${(amount / maxAmount) * 100}%`,
-                                        height: '100%',
-                                        background: amount < 0 ? '#ff6b6b' : '#28a745'
-                                    }} />
-                                </div>
+                                <div style={{ width: '70px', textAlign: 'right', fontSize: '0.9rem', color: '#fff', fontWeight: '500' }}>{currency}{income.toFixed(0)}</div>
                             </div>
-                        ))
-                    )}
-                </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '60px', fontSize: '0.8rem', color: '#ff6b6b', fontWeight: '600' }}>Expense</div>
+                                <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginRight: '10px' }}>
+                                    <div style={{ width: `${(expense / maxAmount) * 100}%`, height: '100%', background: '#ff6b6b', transition: 'width 0.5s ease' }}></div>
+                                </div>
+                                <div style={{ width: '70px', textAlign: 'right', fontSize: '0.9rem', color: '#fff', fontWeight: '500' }}>{currency}{expense.toFixed(0)}</div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

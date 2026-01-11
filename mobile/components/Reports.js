@@ -24,14 +24,19 @@ const Reports = ({ visible, onClose, expenses, currency }) => {
                 key = `${date.getFullYear()}`;
             }
 
-            if (!data[key]) data[key] = 0;
-            data[key] += parseFloat(expense.amount);
+            if (!data[key]) data[key] = { income: 0, expense: 0 };
+            const amount = parseFloat(expense.amount);
+            if (amount > 0) {
+                data[key].income += amount;
+            } else {
+                data[key].expense += Math.abs(amount);
+            }
         });
 
         return Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
     }, [expenses, view]);
 
-    const maxAmount = Math.max(...aggregatedData.map(([, amount]) => amount), 0);
+    const maxAmount = Math.max(...aggregatedData.map(([, { income, expense }]) => Math.max(income, expense)), 0) || 1;
 
     return (
         <Modal
@@ -67,24 +72,29 @@ const Reports = ({ visible, onClose, expenses, currency }) => {
                         {aggregatedData.length === 0 ? (
                             <Text style={styles.emptyText}>No data available.</Text>
                         ) : (
-                            aggregatedData.map(([key, amount]) => (
+                            aggregatedData.map(([key, { income, expense }]) => (
                                 <View key={key} style={styles.reportItem}>
-                                    <View style={styles.reportHeader}>
-                                        <Text style={styles.reportKey}>{key}</Text>
-                                        <Text style={styles.reportAmount}>{currency}{amount.toFixed(2)}</Text>
+                                    <Text style={styles.reportKey}>{key}</Text>
+
+                                    <View style={styles.barRow}>
+                                        <Text style={styles.barLabelIncome}>Inc</Text>
+                                        <View style={styles.barTrack}>
+                                            <View style={[styles.bar, { width: `${(income / maxAmount) * 100}%`, backgroundColor: '#00d2d3' }]} />
+                                        </View>
+                                        <Text style={styles.barValue}>{currency}{income.toFixed(0)}</Text>
                                     </View>
-                                    <View style={styles.barContainer}>
-                                        <View style={[
-                                            styles.bar,
-                                            {
-                                                width: `${(amount / maxAmount) * 100}%`,
-                                                backgroundColor: amount < 0 ? '#ff6b6b' : '#28a745'
-                                            }
-                                        ]} />
+
+                                    <View style={styles.barRow}>
+                                        <Text style={styles.barLabelExpense}>Exp</Text>
+                                        <View style={styles.barTrack}>
+                                            <View style={[styles.bar, { width: `${(expense / maxAmount) * 100}%`, backgroundColor: '#ff6b6b' }]} />
+                                        </View>
+                                        <Text style={styles.barValue}>{currency}{expense.toFixed(0)}</Text>
                                     </View>
                                 </View>
                             ))
                         )}
+                        <View style={{ height: 20 }} />
                     </ScrollView>
                 </View>
             </View>
@@ -157,30 +167,52 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     reportItem: {
-        marginBottom: 20,
-    },
-    reportHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: 16,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        padding: 12,
+        borderRadius: 12,
     },
     reportKey: {
-        color: '#fff',
-        fontWeight: '500',
-    },
-    reportAmount: {
-        color: '#fff',
+        color: '#ccc',
         fontWeight: 'bold',
+        marginBottom: 8,
+        fontSize: 14,
     },
-    barContainer: {
+    barRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    barLabelIncome: {
+        width: 30,
+        color: '#00d2d3',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    barLabelExpense: {
+        width: 30,
+        color: '#ff6b6b',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    barTrack: {
+        flex: 1,
         height: 8,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: 4,
+        marginHorizontal: 8,
         overflow: 'hidden',
     },
     bar: {
         height: '100%',
     },
+    barValue: {
+        width: 50,
+        textAlign: 'right',
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '500',
+    }
 });
 
 export default Reports;

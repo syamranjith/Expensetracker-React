@@ -6,12 +6,15 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [category, setCategory] = useState('Other');
+    const [type, setType] = useState('expense'); // 'expense' or 'income'
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (editingExpense) {
             setDescription(editingExpense.description);
-            setAmount(editingExpense.amount);
+            const editingAmount = parseFloat(editingExpense.amount);
+            setAmount(Math.abs(editingAmount).toString());
+            setType(editingAmount < 0 ? 'expense' : 'income');
             setDate(editingExpense.date);
             setCategory(editingExpense.category || 'Other');
         } else {
@@ -24,6 +27,7 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
         setAmount('');
         setDate(new Date().toISOString().split('T')[0]);
         setCategory('Other');
+        setType('expense');
         setErrors({});
     };
 
@@ -43,10 +47,12 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
 
         if (!validate()) return;
 
+        const finalAmount = type === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
+
         if (editingExpense) {
-            onUpdate({ ...editingExpense, description, amount: parseFloat(amount), date, category });
+            onUpdate({ ...editingExpense, description, amount: finalAmount, date, category });
         } else {
-            onAdd({ description, amount: parseFloat(amount), date, category });
+            onAdd({ description, amount: finalAmount, date, category });
         }
 
         if (!editingExpense) {
@@ -66,6 +72,36 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
                     Please fill in all required fields correctly.
                 </div>
             )}
+
+            <div className="type-toggle-container" style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                <button
+                    type="button"
+                    className={`type-btn ${type === 'expense' ? 'active-expense' : ''}`}
+                    onClick={() => setType('expense')}
+                    style={{
+                        flex: 1,
+                        background: type === 'expense' ? '#ff6b6b' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid ' + (type === 'expense' ? '#ff6b6b' : 'rgba(255,255,255,0.2)'),
+                        color: 'white'
+                    }}
+                >
+                    Expense
+                </button>
+                <button
+                    type="button"
+                    className={`type-btn ${type === 'income' ? 'active-income' : ''}`}
+                    onClick={() => setType('income')}
+                    style={{
+                        flex: 1,
+                        background: type === 'income' ? '#00d2d3' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid ' + (type === 'income' ? '#00d2d3' : 'rgba(255,255,255,0.2)'),
+                        color: 'white'
+                    }}
+                >
+                    Income
+                </button>
+            </div>
+
             <div className="form-group">
                 <label>Description</label>
                 <input
@@ -118,8 +154,8 @@ const AddExpenseForm = ({ onAdd, onUpdate, editingExpense, setEditingExpense, ca
                 />
             </div>
             <div style={{ width: '100%', display: 'flex', gap: '10px' }}>
-                <button type="submit" style={{ flex: 1 }}>
-                    {editingExpense ? 'Update Expense' : 'Add Expense'}
+                <button type="submit" style={{ flex: 1, backgroundColor: type === 'income' ? '#00d2d3' : '#646cff' }}>
+                    {editingExpense ? 'Update Transaction' : 'Add Transaction'}
                 </button>
                 {editingExpense && (
                     <button type="button" onClick={handleCancel} style={{ flex: 1, backgroundColor: '#666', backgroundImage: 'none', boxShadow: 'none' }}>
